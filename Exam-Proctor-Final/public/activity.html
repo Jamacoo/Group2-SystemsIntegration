@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Live Activity</title>
+<style>
+  :root { --maroon:#7A0C22; --maroon-dark:#5C0918; --gold:#FFC72C; --gold-light:#FFF6DF; }
+  body { font-family: Arial, sans-serif; margin:0; background:#f8f9fa; }
+  nav { background:var(--maroon); padding:14px 30px; display:flex; align-items:center; gap:24px; }
+  nav .brand { color:var(--gold); font-weight:bold; font-size:16px; margin-right:auto; }
+  nav a { color:#f0d9b5; text-decoration:none; font-size:14px; }
+  nav a:hover, nav a.active { color:var(--gold); }
+  main { padding:30px; }
+  h2 { margin-top:0; color:var(--maroon-dark); }
+  h3 { color:var(--maroon-dark); margin:24px 0 8px; }
+  .muted { color:#6b7280; font-size:12px; }
+  #live { display:flex; flex-wrap:wrap; gap:12px; }
+  .card { background:#fff; border:1px solid #ddd; border-left:6px solid var(--maroon); border-radius:6px;
+          padding:10px 14px; min-width:260px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .card:hover { background:#fdf3f4; }
+  .card.sel { outline:2px solid var(--maroon); }
+  .card .who { font-weight:bold; }
+  .card .now { font-size:15px; margin:4px 0; }
+  #toolbar { display:flex; align-items:center; gap:12px; margin-bottom:10px; font-size:13px; }
+  select { padding:6px; font-size:13px; max-width:420px; }
+  table { width:100%; border-collapse:collapse; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  th, td { padding:8px 12px; text-align:left; border:1px solid #ccc; font-size:13px; vertical-align:top; }
+  th { background:var(--gold-light); color:var(--maroon-dark); border-bottom:2px solid var(--maroon); }
+  .badge { display:inline-block; padding:2px 9px; border-radius:10px; font-size:11px; font-weight:bold; color:#fff; background:#6b7280; }
+  .badge.EXAM { background:#16a34a; } .badge.AI_SITE { background:#dc2626; }
+  .badge.APP { background:#f59e0b; } .badge.BROWSER { background:#6b7280; }
+  .src { font-size:11px; padding:1px 8px; border-radius:10px; background:#e5e7eb; }
+  .src.extension { background:#dbeafe; color:#1e40af; } .src.monitor { background:#ede9fe; color:#5b21b6; }
+  #empty { padding:30px; text-align:center; color:#888; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="brand">Exam Proctor System</span>
+  <a href="index.html">Home</a>
+  <a href="admin.html">Admin Panel</a>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="activity.html" class="active">Live Activity</a>
+</nav>
+<main>
+  <h2>Live Activity</h2>
+
+  <h3>Right now</h3>
+  <div id="live"><span class="muted">Loading…</span></div>
+
+  <h3>Active-window log</h3>
+  <div id="toolbar">
+    <label>Session: <select id="session-select"></select></label>
+    <label><input type="checkbox" id="auto" checked> Auto-refresh (3s)</label>
+    <span id="updated" class="muted"></span>
+  </div>
+  <table>
+    <thead><tr><th>Time</th><th>Time spent</th><th>Application</th></tr></thead>
+    <tbody id="log-body"></tbody>
+  </table>
+  <div id="empty" style="display:none;">No activity recorded for this session yet.</div>
+</main>
+<script src="activity.js"></script>
+</body>
+</html>

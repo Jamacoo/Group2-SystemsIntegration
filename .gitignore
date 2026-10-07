@@ -1,0 +1,4 @@
+Exam-Proctor-Final/backend/.env
+node_modules/
+__pycache__/
+*.pyc

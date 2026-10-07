@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel — Exam Proctor System</title>
+<style>
+  :root {
+    --maroon: #7A0C22;
+    --maroon-dark: #5C0918;
+    --gold: #FFC72C;
+    --gold-dark: #D4A017;
+    --gold-light: #FFF6DF;
+  }
+  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f8f9fa; color: #1a1a1a; }
+  nav {
+    background: var(--maroon); padding: 14px 30px; display: flex; align-items: center;
+    gap: 24px;
+  }
+  nav .brand { color: var(--gold); font-weight: bold; font-size: 16px; margin-right: auto; }
+  nav a { color: #f0d9b5; text-decoration: none; font-size: 14px; }
+  nav a:hover, nav a.active { color: var(--gold); }
+  main { max-width: 900px; margin: 0 auto; padding: 30px; }
+  h2 { margin-top: 0; color: var(--maroon-dark); }
+  .card { background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 24px; border-top: 3px solid var(--gold); }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; margin-top: 12px; }
+  input[type=text] { width: 100%; padding: 8px; box-sizing: border-box; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+  button {
+    padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;
+    font-size: 14px; margin-top: 14px;
+  }
+  #add-btn { background: var(--maroon); color: #fff; }
+  #add-btn:hover { background: var(--maroon-dark); }
+  .save-btn { background: var(--maroon); color: #fff; margin-top: 0; }
+  .save-btn:hover { background: var(--maroon-dark); }
+  .cancel-btn { background: #9ca3af; color: #fff; margin-top: 0; }
+  .edit-btn { background: var(--gold-light); color: var(--maroon-dark); margin-top: 0; }
+  .delete-btn { background: #fee2e2; color: #b91c1c; margin-top: 0; }
+  .copy-btn { background: var(--gold); color: var(--maroon-dark); margin-top: 0; font-size: 12px; padding: 4px 10px; font-weight: 600; }
+  .copy-btn:hover { background: var(--gold-dark); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 10px 12px; text-align: left; border: 1px solid #ccc; font-size: 14px; vertical-align: top; }
+  th { background: var(--gold-light); color: var(--maroon-dark); font-weight: 700; border-bottom: 2px solid var(--maroon); }
+  .link-cell { display: flex; align-items: center; gap: 8px; }
+  .link-cell code { font-size: 12px; background: #f1f5f9; padding: 2px 6px; border-radius: 3px; word-break: break-all; }
+  .actions { display: flex; gap: 6px; }
+  #status-msg { font-size: 13px; margin-top: 10px; }
+  #status-msg.error { color: #b91c1c; }
+  #status-msg.success { color: #15803d; }
+  #empty-msg { color: #888; padding: 20px 0; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">Exam Proctor System</span>
+  <a href="index.html">Home</a>
+  <a href="admin.html" class="active">Admin Panel</a>
+  <a href="dashboard.html">Dashboard</a>
+</nav>
+
+<main>
+  <h2>Manage Exams</h2>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Add a New Exam</h3>
+    <label for="new-exam-name">Exam Name</label>
+    <input type="text" id="new-exam-name" placeholder="e.g. Midterm — Statistics">
+    <label for="new-exam-url">Google Form Embed URL</label>
+    <input type="text" id="new-exam-url" placeholder="https://docs.google.com/forms/d/e/.../viewform?embedded=true">
+    <button id="add-btn">Add Exam</button>
+    <div id="status-msg"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Existing Exams</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Exam Name</th>
+          <th>Student Portal Link</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="exams-body"></tbody>
+    </table>
+    <div id="empty-msg" style="display:none;">No exams yet — add one above.</div>
+  </div>
+</main>
+
+<script src="admin.js"></script>
+</body>
+</html>
