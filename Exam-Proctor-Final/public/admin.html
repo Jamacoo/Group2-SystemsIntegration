@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel — Exam Proctor System</title>
+<title>Admin Panel — TestGuard</title>
 <style>
   :root {
     --maroon: #7A0C22;
@@ -24,6 +24,8 @@
   .card { background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 24px; border-top: 3px solid var(--gold); }
   label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; margin-top: 12px; }
   input[type=text] { width: 100%; padding: 8px; box-sizing: border-box; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+  select { width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+  .hint { font-size: 12px; color: #666; margin-top: 6px; }
   button {
     padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;
     font-size: 14px; margin-top: 14px;
@@ -51,15 +53,33 @@
 </head>
 <body>
 
+
 <nav>
-  <span class="brand">Exam Proctor System</span>
+  <span class="brand">TestGuard</span>
   <a href="index.html">Home</a>
   <a href="admin.html" class="active">Admin Panel</a>
   <a href="dashboard.html">Dashboard</a>
+  <a href="activity.html">Live Activity</a>
+  <a href="guide.html">Setup Guide</a>
 </nav>
+
 
 <main>
   <h2>Manage Exams</h2>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Share with Students</h3>
+    <div id="network-box">
+    <label for="server-url">This computer's network address</label>
+    <select id="server-url"></select>
+    <div class="hint">For students on the same Wi-Fi or network. If you see several addresses, pick the one that starts like your Wi-Fi's (often 192.168.x.x).</div>
+    <label for="public-url">Public address (for students on other networks)</label>
+    <input type="text" id="public-url" placeholder="https://something.trycloudflare.com">
+    <div class="hint">Paste the address from your tunnel here (see Help &gt; Share Over the Internet). Leave empty to use the network address above.</div>
+    </div>
+    <label>Extension download page (send this to students first)</label>
+    <div class="link-cell"><code id="ext-link"></code><button class="copy-btn" id="ext-copy">Copy Link</button></div>
+  </div>
 
   <div class="card">
     <h3 style="margin-top:0;">Add a New Exam</h3>

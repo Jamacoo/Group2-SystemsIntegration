@@ -10,7 +10,7 @@ const pool = require('../db');
 router.get('/', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT id, exam_name, form_url, created_at FROM exams ORDER BY created_at DESC'
+      'SELECT id, exam_name, form_url, created_at FROM exams ORDER BY created_at DESC, id DESC'
     );
     res.json(rows);
   } catch (err) {
@@ -71,18 +71,29 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/exams/:id
+// Also deletes everything recorded under this exam (sessions,
+// violations, activity log), since the database won't allow an exam
+// to be removed while those rows still point to it.
 router.delete('/:id', async (req, res) => {
+  const conn = await pool.getConnection();
   try {
-    await pool.query('DELETE FROM exams WHERE id = ?', [req.params.id]);
+    await conn.beginTransaction();
+    const examId = req.params.id;
+    const [sessions] = await conn.query('SELECT id FROM exam_sessions WHERE exam_id = ?', [examId]);
+    const ids = sessions.map(s => s.id);
+    if (ids.length > 0) {
+      await conn.query('DELETE FROM activity_log WHERE session_id IN (?)', [ids]);
+      await conn.query('DELETE FROM violations WHERE session_id IN (?)', [ids]);
+      await conn.query('DELETE FROM exam_sessions WHERE id IN (?)', [ids]);
+    }
+    await conn.query('DELETE FROM exams WHERE id = ?', [examId]);
+    await conn.commit();
     res.json({ status: 'deleted' });
   } catch (err) {
-    // Foreign key constraint: exam_sessions references this exam.
-    if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.code === 'ER_ROW_IS_REFERENCED') {
-      return res.status(409).json({
-        error: 'Cannot delete this exam — it already has student sessions recorded against it.'
-      });
-    }
+    await conn.rollback();
     res.status(500).json({ error: err.message });
+  } finally {
+    conn.release();
   }
 });
 

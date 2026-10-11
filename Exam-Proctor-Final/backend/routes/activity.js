@@ -16,6 +16,15 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'sessionId, studentId, source and category are required' });
   }
   try {
+    // The monitor and the extension can both report the same app —
+    // don't log the same app twice in a row for one session.
+    const [last] = await pool.query(
+      'SELECT label FROM activity_log WHERE session_id = ? ORDER BY occurred_at DESC, id DESC LIMIT 1',
+      [sessionId]
+    );
+    if (last.length && last[0].label === cut(label, 150)) {
+      return res.status(200).json({ status: 'unchanged' });
+    }
     await pool.query(
       `INSERT INTO activity_log
          (session_id, student_id, source, category, label, window_title, process_name, host, occurred_at)

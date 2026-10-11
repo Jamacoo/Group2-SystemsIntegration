@@ -1,0 +1,27 @@
+{
+  "name": "exam-proctor",
+  "version": "1.0.2",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "reset": "node backend/reset-data.js",
+    "build": "electron-builder"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mysql2": "^3.11.0"
+  },
+  "devDependencies": {
+    "electron": "*",
+    "electron-builder": "*"
+  },
+    "build": {
+    "appId": "com.pup.examproctor",
+    "productName": "TestGuard Companion",
+    "files": ["main.js", "backend/**/*", "public/**/*", "!backend/node_modules", "!backend/.env"],
+    "extraResources": [{ "from": "extension", "to": "extension" }],
+    "win": { "target": "nsis" }
+  }
+}

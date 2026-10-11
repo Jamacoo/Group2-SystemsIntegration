@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Exam Proctor System</title>
+<title>TestGuard</title>
 <style>
   :root {
     --maroon: #7A0C22;
@@ -20,7 +20,7 @@
   nav a:hover, nav a.active { color: var(--gold); }
   main { max-width: 700px; margin: 60px auto; padding: 0 20px; text-align: center; }
   h1 { margin-bottom: 8px; color: var(--maroon-dark); }
-  p.subtitle { color: #555; margin-top: 0; }
+  p.subtitle { color: #555; margin-top: 0; line-height: 1.5; }
   .cards { display: flex; gap: 20px; margin-top: 40px; justify-content: center; flex-wrap: wrap; }
   .card {
     background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -38,16 +38,19 @@
 <body>
 
 <nav>
-  <span class="brand">Exam Proctor System</span>
+  <span class="brand">TestGuard</span>
   <a href="index.html" class="active">Home</a>
   <a href="admin.html">Admin Panel</a>
   <a href="dashboard.html">Dashboard</a>
+  <a href="activity.html">Live Activity</a>
+  <a href="guide.html">Setup Guide</a>
 </nav>
 
+
 <main>
-  <h1>Exam Proctor System</h1>
-  <p class="subtitle">A monitoring wrapper for Google Forms exams — flags likely
-    tab-switching, focus loss, and fullscreen exits during a test.</p>
+  <h1>TestGuard</h1>
+  <p class="subtitle"><strong>Fair online exams, made visible.</strong><br>
+    Track tab switching, sites opened, and fullscreen exits during Google Forms exams, with a risk score for every session.</p>
 
   <div class="cards">
     <div class="card">
@@ -61,6 +64,12 @@
       <p>Review every student session, sorted by risk score, with a
         full timeline of flagged behavior per attempt.</p>
       <a href="dashboard.html">View Dashboard</a>
+    </div>
+    <div class="card">
+      <h3>Setup Guide</h3>
+      <p>Step-by-step instructions for getting the system ready before
+        you send links to students.</p>
+      <a href="guide.html">Read the Guide</a>
     </div>
   </div>
 </main>

@@ -37,6 +37,7 @@ function classify(url, apiBase) {
 }
 
 let last = { host: '', ts: 0 };
+let browserFocused = false;   // false after focus leaves the browser, so the next return is logged
 
 async function handleTab(tab) {
   if (!tab || !tab.url) return;
@@ -56,6 +57,16 @@ async function handleTab(tab) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   }).catch((err) => console.error('[proctor-ext] report failed', err));
+
+  // Live Activity: the browser is the foreground application
+  if (!browserFocused) {
+    browserFocused = true;
+    post('activity', {
+      sessionId: s.sessionId, studentId: s.studentId, source: 'extension',
+      category: 'BROWSER', label: 'Web Browser',
+      occurredAt: new Date().toISOString()
+    });
+  }
 
   // Suspicious sites -> violations (the Live Activity page only shows app names)
   if (result.type) {
@@ -79,7 +90,7 @@ chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
 
 // Student alt-tabs to a different browser WINDOW (no tab event fires for this)
 chrome.windows.onFocusChanged.addListener(async (winId) => {
-  if (winId === chrome.windows.WINDOW_ID_NONE) return;   // focus left the browser; the desktop monitor covers this
+  if (winId === chrome.windows.WINDOW_ID_NONE) { browserFocused = false; return; }   // focus left the browser; the desktop monitor logs what is opened instead
   try {
     const [tab] = await chrome.tabs.query({ active: true, windowId: winId });
     handleTab(tab);
@@ -102,6 +113,7 @@ chrome.alarms.onAlarm.addListener((a) => { if (a.name === 'heartbeat') sendHeart
 // Messages relayed from the exam page
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.type === 'PROCTOR_SESSION') {
+    browserFocused = false;
     chrome.storage.session.set(msg.data).then(sendHeartbeat);
   }
   if (msg.type === 'PROCTOR_END') chrome.storage.session.clear();

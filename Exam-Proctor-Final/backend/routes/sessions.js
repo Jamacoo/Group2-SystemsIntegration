@@ -16,8 +16,8 @@ router.post('/', async (req, res) => {
   }
   try {
     const [result] = await pool.query(
-      'INSERT INTO exam_sessions (student_id, exam_id, started_at) VALUES (?, ?, NOW())',
-      [studentId, examId]
+      'INSERT INTO exam_sessions (student_id, exam_id, started_at) VALUES (?, ?, ?)',
+      [studentId, examId, new Date()]
     );
     res.status(201).json({ sessionId: result.insertId });
   } catch (err) {
@@ -29,8 +29,8 @@ router.post('/', async (req, res) => {
 router.patch('/:id/end', async (req, res) => {
   try {
     await pool.query(
-      'UPDATE exam_sessions SET ended_at = NOW() WHERE id = ?',
-      [req.params.id]
+      'UPDATE exam_sessions SET ended_at = ? WHERE id = ?',
+      [new Date(), req.params.id]
     );
     res.json({ status: 'ended' });
   } catch (err) {
@@ -70,7 +70,7 @@ function statusFor(sessionId) {
 }
 
 // POST /api/sessions/:id/heartbeat   body: { source: 'extension' | 'monitor', info? }
-router.post('/:id/heartbeat', (req, res) => {
+router.post('/:id/heartbeat', async (req, res) => {
   const { source, info } = req.body;
   if (!['extension', 'monitor'].includes(source)) {
     return res.status(400).json({ error: "source must be 'extension' or 'monitor'" });
@@ -80,6 +80,28 @@ router.post('/:id/heartbeat', (req, res) => {
   h[source] = Date.now();
   if (source === 'monitor' && info) h.monitorInfo = info;
   heartbeats.set(key, h);
+
+  // The extension is alive in the student's browser, so the browser is the
+  // foreground app. Make sure the Live Activity log has a first entry even if
+  // no tab/window event has fired yet.
+  if (source === 'extension') {
+    try {
+      const [[sess]] = await pool.query(
+        'SELECT student_id FROM exam_sessions WHERE id = ? AND ended_at IS NULL', [req.params.id]);
+      if (sess) {
+        const [[c]] = await pool.query(
+          'SELECT COUNT(*) AS n FROM activity_log WHERE session_id = ?', [req.params.id]);
+        if (c.n === 0) {
+          await pool.query(
+            `INSERT INTO activity_log (session_id, student_id, source, category, label, occurred_at)
+             VALUES (?, ?, 'extension', 'BROWSER', 'Web Browser', ?)`,
+            [req.params.id, sess.student_id, new Date()]);
+        }
+      }
+    } catch (err) {
+      console.error('Could not seed activity log:', err.message);
+    }
+  }
   res.json({ ok: true, ...statusFor(key) });
 });
 

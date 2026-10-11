@@ -1,4 +1,12 @@
+# Secrets — never upload these
+.env
 backend/.env
+
+# Installed packages and build output
 node_modules/
+dist/
+
+# Local database files and Python leftovers
+*.db
 __pycache__/
 *.pyc

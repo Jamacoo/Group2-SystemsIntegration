@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Install TestGuard</title>
+<style>
+  :root { --maroon: #7A0C22; --maroon-dark: #5C0918; --gold: #FFC72C; --gold-dark: #D4A017; }
+  body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; color: #1a1a1a; }
+  header { background: var(--maroon); padding: 14px 30px; }
+  header span { color: var(--gold); font-weight: bold; font-size: 16px; }
+  main { max-width: 640px; margin: 40px auto; padding: 0 20px; }
+  h1 { color: var(--maroon-dark); margin-bottom: 6px; }
+  .card { background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 24px; border-top: 3px solid var(--gold); margin-top: 20px; }
+  .download {
+    display: inline-block; padding: 12px 24px; background: var(--maroon); color: #fff;
+    text-decoration: none; border-radius: 4px; font-size: 16px;
+  }
+  .download:hover { background: var(--maroon-dark); }
+  ol li { margin-bottom: 10px; line-height: 1.5; }
+  code { background: #f1f5f9; padding: 2px 6px; border-radius: 3px; }
+  .note { font-size: 14px; color: #555; }
+</style>
+</head>
+<body>
+<header><span>TestGuard</span></header>
+<main>
+  <h1>Install the browser extension</h1>
+  <p>You need this extension before you can start your exam.</p>
+
+  <div class="card">
+    <a class="download" href="downloads/TestGuard-Extension.zip" download>Download the extension</a>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">How to install it</h3>
+    <ol>
+      <li>Find the downloaded zip file, right-click it, and choose <strong>Extract All</strong>. Put the folder somewhere you won't delete, such as Documents.</li>
+      <li>Open Chrome or Edge. In the address bar, type <code>chrome://extensions</code> (Edge: <code>edge://extensions</code>) and press Enter.</li>
+      <li>Turn on <strong>Developer mode</strong> (the switch at the top right, or the left menu in Edge).</li>
+      <li>Click <strong>Load unpacked</strong> and choose the extracted folder (the one that contains <code>manifest.json</code>).</li>
+      <li>Go back to your exam link and reload the page.</li>
+    </ol>
+    <p class="note">Works on Chrome, Edge, Brave, and Opera. Do not move or delete the folder afterward. If your browser shows a "developer mode extensions" warning when it starts, keep the extension enabled.</p>
+  </div>
+</main>
+</body>
+</html>

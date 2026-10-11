@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Setup Guide — TestGuard</title>
+<style>
+  :root {
+    --maroon: #7A0C22;
+    --maroon-dark: #5C0918;
+    --gold: #FFC72C;
+    --gold-dark: #D4A017;
+    --gold-light: #FFF6DF;
+  }
+  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f8f9fa; color: #1a1a1a; }
+  nav { background: var(--maroon); padding: 14px 30px; display: flex; align-items: center; gap: 24px; }
+  nav .brand { color: var(--gold); font-weight: bold; font-size: 16px; margin-right: auto; }
+  nav a { color: #f0d9b5; text-decoration: none; font-size: 14px; }
+  nav a:hover, nav a.active { color: var(--gold); }
+  main { max-width: 760px; margin: 0 auto; padding: 30px; }
+  h2 { margin-top: 0; color: var(--maroon-dark); }
+  .card { background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 22px; margin-bottom: 24px; border-top: 3px solid var(--gold); }
+  .card h3 { margin-top: 0; color: var(--maroon-dark); }
+  ol { padding-left: 22px; }
+  ol li { margin-bottom: 18px; line-height: 1.55; }
+  code { background: #f1f5f9; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">TestGuard</span>
+  <a href="index.html">Home</a>
+  <a href="admin.html">Admin Panel</a>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="activity.html">Live Activity</a>
+  <a href="guide.html" class="active">Setup Guide</a>
+</nav>
+
+<main>
+  <h2>Setup Guide</h2>
+
+  <div class="card">
+    <h3>Running an exam</h3>
+    <ol>
+      <li>
+        In the <a href="admin.html">Admin Panel</a> under <strong>Add a New Exam</strong>, enter a name and your Google Form's embed link. To get it,
+        open your Google Form, click <strong>Send</strong>, choose the <code>&lt;&gt;</code> (embed) tab,
+        and copy only the address inside <code>src="..."</code>.
+      </li>
+      <li>
+        In <strong>Share with Students</strong>, copy the <a href="extension.html">extension link</a> and send it to
+        your students first. The page it opens explains how to install the extension.
+      </li>
+      <li>
+        Then send each student the exam's own link from the exam list. They must install the extension
+        before they start.
+      </li>
+      <li>
+        During the exam, watch the <a href="dashboard.html">Dashboard</a> and
+        <a href="activity.html">Live Activity</a> pages.
+      </li>
+    </ol>
+  </div>
+</main>
+
+</body>
+</html>
