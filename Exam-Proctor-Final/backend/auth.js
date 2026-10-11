@@ -75,7 +75,7 @@ function checkAdmin(req, res, next) {
     recordFailure(req.ip);
   }
 
-  res.set('WWW-Authenticate', 'Basic realm="TestGuard Companion instructor"');
+  res.set('WWW-Authenticate', 'Basic realm="TestGuard instructor"');
   res.status(401).send('Instructor password required.');
 }
 

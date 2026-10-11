@@ -4,6 +4,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "reset": "node reset-data.js",
     "build": "electron-builder"
   },
   "dependencies": {

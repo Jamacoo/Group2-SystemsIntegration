@@ -71,7 +71,7 @@ async function startExam() {
   }
 
   if (REQUIRE_EXTENSION && !extensionReady) {
-    if (confirm('The TestGuard Companion browser extension is not installed or not enabled.\n\nOpen the download page now?')) {
+    if (confirm('The TestGuard browser extension is not installed or not enabled.\n\nOpen the download page now?')) {
       window.location.href = '/extension.html';
     }
     return;

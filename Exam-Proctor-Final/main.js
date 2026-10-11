@@ -94,7 +94,7 @@ const SETUP_HTML = `<!DOCTYPE html>
   a { color: #7A0C22; font-size: 14px; }
   .note { font-size: 12px; color: #666; margin-top: 12px; }
 </style></head><body>
-<header>TestGuard Companion</header>
+<header>TestGuard</header>
 <main>
   <h2>Connect your database</h2>
   <p>The app stores its data in a free Aiven MySQL database.</p>
@@ -222,7 +222,7 @@ async function showExtensionHelp() {
   const source = app.isPackaged
     ? path.join(process.resourcesPath, 'extension')
     : path.join(__dirname, 'extension');
-  const target = path.join(app.getPath('documents'), 'TestGuard Companion Extension');
+  const target = path.join(app.getPath('documents'), 'TestGuard Extension');
 
   try {
     fs.cpSync(source, target, { recursive: true });
@@ -234,7 +234,7 @@ async function showExtensionHelp() {
   const result = await dialog.showMessageBox({
     type: 'info',
     title: 'Install the browser extension',
-    message: 'Install the TestGuard Companion browser extension',
+    message: 'Install the TestGuard browser extension',
     detail:
       'The extension is needed so the exam can see which sites are opened.\n\n' +
       '1. Open Chrome or Edge, and go to chrome://extensions (or edge://extensions).\n' +
@@ -294,7 +294,7 @@ app.whenReady().then(async () => {
   require('./backend/server.js'); // starts the server
 
   createMenu();
-  const win = new BrowserWindow({ width: 1200, height: 800, title: 'TestGuard Companion' });
+  const win = new BrowserWindow({ width: 1200, height: 800, title: 'TestGuard' });
   quitWhenAllClosed = true;
   // Keep our title instead of the web page's <title>.
   win.on('page-title-updated', (event) => event.preventDefault());

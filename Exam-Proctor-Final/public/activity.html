@@ -35,19 +35,18 @@
 </style>
 </head>
 <body>
+
 <nav>
-  <span class="brand">TestGuard Companion</span>
+  <span class="brand">TestGuard</span>
   <a href="index.html">Home</a>
   <a href="admin.html">Admin Panel</a>
   <a href="dashboard.html">Dashboard</a>
   <a href="activity.html" class="active">Live Activity</a>
   <a href="guide.html">Setup Guide</a>
 </nav>
+
 <main>
   <h2>Live Activity</h2>
-
-  <h3>Right now</h3>
-  <div id="live"><span class="muted">Loading…</span></div>
 
   <h3>Active-window log</h3>
   <div id="toolbar">
@@ -56,7 +55,7 @@
     <span id="updated" class="muted"></span>
   </div>
   <table>
-    <thead><tr><th>Time</th><th>Time spent</th><th>Application</th></tr></thead>
+    <thead><tr><th>Time</th><th>Student ID</th><th>Time spent</th><th>Application</th></tr></thead>
     <tbody id="log-body"></tbody>
   </table>
   <div id="empty" style="display:none;">No activity recorded for this session yet.</div>

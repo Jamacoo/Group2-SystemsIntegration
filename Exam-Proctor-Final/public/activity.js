@@ -30,37 +30,13 @@ async function getJSON(path) {
   return res.json();
 }
 
-async function loadLive() {
-  const box = document.getElementById('live');
-  try {
-    const rows = await getJSON('/activity/live');
-    if (!rows.length) {
-      box.innerHTML = '<span class="muted">No active exam sessions are reporting right now.</span>';
-      return;
-    }
-    box.innerHTML = rows.map(a => `
-      <div class="card ${a.session_id === selected ? 'sel' : ''}" data-session="${a.session_id}">
-        <div class="who">${esc(a.student_id)} <span class="muted">· session ${a.session_id}</span></div>
-        <div class="now">${esc(a.label)}</div>
-        <div class="muted">since ${fmtTime(a.occurred_at)}</div>
-      </div>`).join('');
-    box.querySelectorAll('.card').forEach(el => el.addEventListener('click', () => {
-      selected = Number(el.dataset.session);
-      document.getElementById('session-select').value = selected;
-      loadLog();
-    }));
-  } catch {
-    box.innerHTML = '<span class="muted">Failed to load — is the backend running?</span>';
-  }
-}
-
 async function loadSessions() {
   const list = await getJSON('/dashboard/sessions');
   list.sort((a, b) => new Date(b.started_at) - new Date(a.started_at));
   sessions = new Map(list.map(s => [s.session_id, s]));
   const sel = document.getElementById('session-select');
   sel.innerHTML = list.map(s =>
-    `<option value="${s.session_id}">${s.ended_at ? '' : '● LIVE · '}${esc(s.student_id)} — ${esc(s.exam_name || 'Exam #' + s.exam_id)} (session ${s.session_id})</option>`
+    `<option value="${s.session_id}">${s.ended_at ? '' : '● LIVE · '}${esc(s.exam_name || 'Exam #' + s.exam_id)} (session ${s.session_id})</option>`
   ).join('');
   if (selected == null && list.length) {
     selected = (list.find(s => !s.ended_at) || list[0]).session_id;
@@ -84,6 +60,7 @@ async function loadLog() {
     const dur = fmtDuration(end == null ? null : end - start) + (i === 0 && live ? ' (now)' : '');
     return `<tr>
       <td>${fmtTime(a.occurred_at)}</td>
+      <td>${esc(a.student_id)}</td>
       <td>${dur}</td>
       <td><strong>${esc(a.label)}</strong></td>
     </tr>`;
@@ -93,7 +70,7 @@ async function loadLog() {
 
 async function refresh() {
   try { await loadSessions(); } catch {}
-  await Promise.all([loadLive(), loadLog().catch(() => {})]);
+  await loadLog().catch(() => {});
 }
 
 document.getElementById('session-select').addEventListener('change', e => {

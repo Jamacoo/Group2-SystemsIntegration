@@ -205,10 +205,10 @@ def monitor_session(session_id, student_id, limited):
 
         title, proc = get_active_window()
         key = (title, proc)
-        if title and key != previous:
+        if (title or proc != "unknown") and key != previous:
             previous = key
             vtype, label, _category = classify(title, proc, extension_alive)
-            print(f"[{label}] {title}  ({proc})")
+            print(f"[{label}] {title or '(no title)'}  ({proc})")
 
             # Activity log: only when the APPLICATION changes (switching between
             # two Chrome tabs stays one "Web Browser" entry, not many).

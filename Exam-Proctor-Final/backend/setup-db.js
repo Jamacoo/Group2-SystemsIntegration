@@ -91,7 +91,7 @@ async function setupDatabase() {
     if (firstRun) {
       await conn.query('INSERT INTO exams (exam_name, form_url) VALUES (?, ?)', [
         'Sample Exam',
-        'https://docs.google.com/forms/d/e/REPLACE_WITH_YOUR_FORM_ID/viewform?embedded=true'
+        'https://docs.google.com/forms/d/e/1FAIpQLSdOksUPuuxkmuBqNmPFnnjzLFpHiXzckApZ13KPiTfTwjINIw/viewform?embedded=true'
       ]);
     }
   } finally {
