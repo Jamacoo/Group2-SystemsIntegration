@@ -26,7 +26,8 @@ function buildRiskCase() {
   const whens = Object.entries(RISK_WEIGHTS)
     .map(([type, weight]) => `WHEN v.type = '${type}' THEN ${weight}`)
     .join(' ');
-  return `CASE ${whens} ELSE 1 END`;
+  // A session with no violations has no row to score, so it must count as 0.
+  return `CASE WHEN v.id IS NULL THEN 0 ${whens} ELSE 1 END`;
 }
 
 // A violation this close to the LAST recorded violation in its
@@ -68,7 +69,7 @@ router.get('/sessions', async (req, res) => {
         FROM violations
         GROUP BY session_id
       ) vmax ON vmax.session_id = s.id
-      GROUP BY s.id
+      GROUP BY s.id, s.student_id, s.exam_id, e.exam_name, s.started_at, s.ended_at
       ORDER BY risk_score DESC, s.started_at DESC
     `);
     res.json(rows);

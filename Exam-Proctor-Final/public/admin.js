@@ -1,10 +1,79 @@
 // admin.js — manages exams: list, add, inline edit, delete, and
 // generates shareable student portal links.
 
-const API_BASE = 'http://localhost:3000/api';
+// Uses whatever address this page was opened from (works on localhost and on the network).
+const API_BASE = window.location.origin + '/api';
+
+// The address students use to reach this computer (set in initServerAddress).
+let serverUrl = window.location.origin;
 
 function portalLink(examId) {
-  return `${window.location.origin}/exam.html?examId=${examId}`;
+  return `${serverUrl}/exam.html?examId=${examId}`;
+}
+
+// Makes the "Copy Link" button copy the extension download link.
+function wireExtensionCopy() {
+  document.getElementById('ext-copy').addEventListener('click', async (e) => {
+    try {
+      await navigator.clipboard.writeText(`${serverUrl}/extension.html`);
+      e.target.textContent = 'Copied!';
+      setTimeout(() => { e.target.textContent = 'Copy Link'; }, 1500);
+    } catch (err) {
+      showStatus('Could not copy — copy the link manually.', true);
+    }
+  });
+}
+
+// Shows the extension download link for students. On a computer running the
+// app itself, it also offers the network addresses to choose from.
+async function initServerAddress() {
+  // Opened over the internet: students use the same address as this page.
+  const online = !['localhost', '127.0.0.1'].includes(window.location.hostname);
+  if (online) {
+    document.getElementById('network-box').style.display = 'none';
+    serverUrl = window.location.origin;
+    document.getElementById('ext-link').textContent = `${serverUrl}/extension.html`;
+    wireExtensionCopy();
+    loadExams();
+    return;
+  }
+
+  const select = document.getElementById('server-url');
+  let urls = [];
+  try {
+    const res = await fetch(`${API_BASE}/server-info`);
+    urls = (await res.json()).urls;
+  } catch (err) {
+    urls = [];
+  }
+  if (urls.length === 0) urls = [window.location.origin];
+
+  select.innerHTML = '';
+  urls.forEach(url => {
+    const option = document.createElement('option');
+    option.value = url;
+    option.textContent = url;
+    select.appendChild(option);
+  });
+
+  const publicInput = document.getElementById('public-url');
+  try { publicInput.value = localStorage.getItem('publicUrl') || ''; } catch (err) {}
+
+  function applyAddress() {
+    // A pasted public address wins over the network address.
+    const typed = publicInput.value.trim().replace(/\/+$/, '');
+    serverUrl = typed || select.value;
+    document.getElementById('ext-link').textContent = `${serverUrl}/extension.html`;
+    loadExams();
+  }
+  select.addEventListener('change', applyAddress);
+  publicInput.addEventListener('change', () => {
+    try { localStorage.setItem('publicUrl', publicInput.value.trim()); } catch (err) {}
+    applyAddress();
+  });
+
+  wireExtensionCopy();
+  applyAddress();
 }
 
 function showStatus(message, isError) {
@@ -158,4 +227,4 @@ async function loadExams() {
 
 document.getElementById('add-btn').addEventListener('click', addExam);
 
-loadExams();
+initServerAddress();

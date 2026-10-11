@@ -16,8 +16,8 @@ router.post('/', async (req, res) => {
   }
   try {
     const [result] = await pool.query(
-      'INSERT INTO exam_sessions (student_id, exam_id, started_at) VALUES (?, ?, NOW())',
-      [studentId, examId]
+      'INSERT INTO exam_sessions (student_id, exam_id, started_at) VALUES (?, ?, ?)',
+      [studentId, examId, new Date()]
     );
     res.status(201).json({ sessionId: result.insertId });
   } catch (err) {
@@ -29,8 +29,8 @@ router.post('/', async (req, res) => {
 router.patch('/:id/end', async (req, res) => {
   try {
     await pool.query(
-      'UPDATE exam_sessions SET ended_at = NOW() WHERE id = ?',
-      [req.params.id]
+      'UPDATE exam_sessions SET ended_at = ? WHERE id = ?',
+      [new Date(), req.params.id]
     );
     res.json({ status: 'ended' });
   } catch (err) {

@@ -1,7 +1,8 @@
 // proctor.js — runs on the wrapper page. Handles starting/ending the
 // exam session and detecting + logging suspicious behavior.
 
-const API_BASE = 'http://localhost:3000/api';
+// Uses whatever address this page was opened from (works on localhost and on the network).
+const API_BASE = window.location.origin + '/api';
 const params = new URLSearchParams(window.location.search);
 const examId = params.get('examId') || '1';
 
@@ -70,7 +71,9 @@ async function startExam() {
   }
 
   if (REQUIRE_EXTENSION && !extensionReady) {
-    alert('The Exam Proctor browser extension is not installed or not enabled. Install it, reload this page, and try again.');
+    if (confirm('The TestGuard Companion browser extension is not installed or not enabled.\n\nOpen the download page now?')) {
+      window.location.href = '/extension.html';
+    }
     return;
   }
 
@@ -138,7 +141,11 @@ async function endSession() {
 
   document.getElementById('end-session-bar').style.display = 'none';
   document.getElementById('exam-frame').style.display = 'none';
-  alert('Session ended. You may close this tab.');
+
+  // Show the "session ended" screen instead of leaving a blank page.
+  document.getElementById('warning-banner').style.display = 'none';
+  document.getElementById('ended-screen').style.display = 'block';
+  window.scrollTo(0, 0);
 }
 
 // --- Detection listeners ---

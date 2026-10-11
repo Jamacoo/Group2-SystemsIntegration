@@ -4,16 +4,18 @@
 
 const mysql = require('mysql2/promise');
 require('dotenv').config();
+const { getDbConfig } = require('./dbconfig');
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  ...getDbConfig(),
+  // Dates are always stored and read as UTC, so the times are right no
+  // matter which computer's clock or time zone the app runs on.
+  timezone: 'Z',
   waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  connectionLimit: 5,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  connectTimeout: 15000
 });
 
 module.exports = pool;

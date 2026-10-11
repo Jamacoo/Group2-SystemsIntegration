@@ -2,7 +2,8 @@
 // (Notepad / Microsoft Word / Web Browser / Other Application), plus a
 // per-session log of every app switch and how long each lasted.
 
-const API_BASE = 'http://localhost:3000/api';
+// Uses whatever address this page was opened from (works on localhost and on the network).
+const API_BASE = window.location.origin + '/api';
 
 let sessions = new Map();     // session_id -> row from /dashboard/sessions
 let selected = null;          // session_id currently shown in the log

@@ -1,7 +1,8 @@
 // dashboard.js — loads the session summary and renders it as a
 // sortable, expandable table for the instructor.
 
-const API_BASE = 'http://localhost:3000/api';
+// Uses whatever address this page was opened from (works on localhost and on the network).
+const API_BASE = window.location.origin + '/api';
 
 // Rows already expanded, so a refresh doesn't collapse what the
 // instructor was looking at. Keyed by session_id.
