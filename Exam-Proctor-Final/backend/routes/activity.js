@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const { ownsSession } = require('../auth');
 
 const cut = (v, n) => (v == null ? null : String(v).slice(0, n));
 
@@ -53,9 +54,10 @@ router.get('/live', async (req, res) => {
       JOIN (SELECT session_id, MAX(id) AS max_id FROM activity_log GROUP BY session_id) m
         ON a.id = m.max_id
       JOIN exam_sessions s ON s.id = a.session_id
+      JOIN exams e ON e.id = s.exam_id AND e.professor_id = ?
       WHERE s.ended_at IS NULL
       ORDER BY a.occurred_at DESC
-    `);
+    `, [req.professor.id]);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -66,6 +68,9 @@ router.get('/live', async (req, res) => {
 router.get('/session/:id', async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit, 10) || 200, 1000);
   try {
+    if (!(await ownsSession(req.professor.id, req.params.id))) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
     const [rows] = await pool.query(
       'SELECT * FROM activity_log WHERE session_id = ? ORDER BY occurred_at DESC, id DESC LIMIT ?',
       [req.params.id, limit]

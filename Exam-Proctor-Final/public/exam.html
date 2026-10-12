@@ -1,49 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Exam Portal</title>
+<link rel="stylesheet" href="style.css">
 <style>
-  :root {
-    --maroon: #7A0C22;
-    --maroon-dark: #5C0918;
-    --gold: #FFC72C;
-    --gold-dark: #D4A017;
-  }
-  body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
   #warning-banner {
-    display: none; background: #dc2626; color: #fff; padding: 12px;
-    text-align: center; font-weight: bold; position: sticky; top: 0; z-index: 1000;
+    display: none; background: #b91c1c; color: #fff; padding: 12px;
+    text-align: center; font-weight: 600; position: sticky; top: 0; z-index: 1000;
   }
-  #setup-screen { max-width: 400px; margin: 80px auto; text-align: center; }
-  #setup-screen h2 { color: var(--maroon-dark); }
-  #setup-screen input {
-    width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box;
-    font-size: 16px; border: 1px solid #ccc; border-radius: 4px;
-  }
-  #setup-screen button {
-    padding: 10px 24px; background: var(--maroon); color: #fff; border: none;
-    border-radius: 4px; cursor: pointer; font-size: 16px;
-  }
-  #setup-screen button:hover { background: var(--maroon-dark); }
-  #end-session-bar { display: none; text-align: right; padding: 10px 20px; }
-  #end-btn {
-    padding: 10px 24px; background: var(--gold); color: var(--maroon-dark); border: none;
-    border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 700;
-  }
-  #end-btn:hover { background: var(--gold-dark); }
-  #exam-frame { width: 100%; height: 85vh; border: none; display: none; }
-  #ended-screen { display: none; max-width: 460px; margin: 100px auto; padding: 0 20px; text-align: center; }
-  #ended-screen .box {
-    background: #fff; border-radius: 8px; box-shadow: 0 1px 6px rgba(0,0,0,0.15);
-    padding: 36px 28px; border-top: 4px solid var(--gold);
-  }
+  .portal-brand { display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; font-size: 18px; margin-bottom: 22px; }
+  #setup-screen { max-width: 420px; margin: 12vh auto 0; padding: 0 16px; text-align: left; }
+  #setup-screen .card { padding: 30px; }
+  #setup-screen h2 { margin-bottom: 4px; }
+  #setup-screen button { width: 100%; margin-top: 18px; padding: 12px; font-size: 15px; }
+  #end-session-bar { display: none; text-align: right; padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  #end-btn { background: transparent; color: var(--accent); border-color: var(--border-strong); }
+  #end-btn:hover { background: var(--surface-2); box-shadow: none; }
+  #exam-frame { width: 100%; height: calc(100vh - 56px); border: none; display: none; background: #fff; }
+  #ended-screen { display: none; max-width: 460px; margin: 14vh auto 0; padding: 0 20px; text-align: center; }
+  #ended-screen .box { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 38px 28px; }
   #ended-screen .check {
-    width: 64px; height: 64px; line-height: 64px; margin: 0 auto 16px;
-    border-radius: 50%; background: var(--maroon); color: var(--gold); font-size: 34px; font-weight: bold;
+    width: 64px; height: 64px; line-height: 64px; margin: 0 auto 18px;
+    border-radius: 50%; background: rgba(23, 125, 129, 0.3); color: var(--accent); font-size: 32px; font-weight: bold;
+    box-shadow: 0 0 0 8px rgba(23, 125, 129, 0.15);
   }
-  #ended-screen h2 { color: var(--maroon-dark); margin: 0 0 10px; }
-  #ended-screen p { color: #555; margin: 6px 0; line-height: 1.5; }
+  #ended-screen p { color: var(--muted); margin: 6px 0; }
 </style>
 </head>
 <body>
@@ -51,10 +34,17 @@
   <div id="warning-banner"></div>
 
   <div id="setup-screen">
-    <h2>Exam Portal</h2>
-    <label for="studentIdInput">Student ID</label>
-    <input type="text" id="studentIdInput" placeholder="e.g. 2023-00123">
-    <button id="start-btn">Start Exam</button>
+    <div class="portal-brand">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.5l8 3v6.2c0 4.7-3.3 8.4-8 9.8-4.7-1.4-8-5.1-8-9.8V5.5l8-3z" fill="#177D81"/><path d="M8.3 12.2l2.7 2.7 4.9-5.3" stroke="#F2FBF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      TestGuard
+    </div>
+    <div class="card">
+      <h2>Exam Portal</h2>
+      <p class="muted" style="margin:0 0 4px;">Enter your Student ID to begin. The exam will open in fullscreen.</p>
+      <label for="studentIdInput">Student ID</label>
+      <input type="text" id="studentIdInput" placeholder="e.g. 2023-00123">
+      <button id="start-btn">Start Exam</button>
+    </div>
   </div>
 
   <div id="end-session-bar">

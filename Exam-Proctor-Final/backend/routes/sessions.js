@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const { ownsSession } = require('../auth');
 
 // POST /api/sessions
 // body: { studentId, examId }
@@ -106,8 +107,15 @@ router.post('/:id/heartbeat', async (req, res) => {
 });
 
 // GET /api/sessions/:id/status  -> is each proctoring component running? (for the dashboard)
-router.get('/:id/status', (req, res) => {
-  res.json(statusFor(req.params.id));
+router.get('/:id/status', async (req, res) => {
+  try {
+    if (!(await ownsSession(req.professor.id, req.params.id))) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+    res.json(statusFor(req.params.id));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

@@ -14,6 +14,7 @@ const sessionsRouter = require('./routes/sessions');
 const violationsRouter = require('./routes/violations');
 const dashboardRouter = require('./routes/dashboard');
 const activityRouter = require('./routes/activity');
+const accountRouter = require('./routes/account');
 
 const app = express();
 
@@ -23,7 +24,7 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 
-// Instructor password for admin pages and admin API routes.
+// Professors must be logged in for the admin pages and admin API routes.
 app.use(checkAdmin);
 
 // Serves everything in the public/ folder (exam.html, proctor.js, etc).
@@ -35,6 +36,7 @@ app.use('/api/sessions', sessionsRouter);
 app.use('/api/violations', violationsRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/activity', activityRouter);
+app.use('/api/account', accountRouter);
 
 // Lists this computer's network addresses so the Admin Panel can build
 // links that students on the same network can open.

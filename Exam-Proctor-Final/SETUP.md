@@ -11,6 +11,14 @@ Create the `exam_proctor` database and run:
 
 Run each once in MySQL Workbench or phpMyAdmin.
 
+## 1b. Professor accounts
+
+Every professor creates their own account on `/login.html` (**Create account**: name, email, password) and only sees their own exams and the records under them. Anyone can sign up.
+
+- When hosting online, set `SESSION_SECRET` to a long random text (it signs the login cookie). If you don't, the database address is used.
+- Exams that existed before accounts were added go to the **first** account created.
+- Existing databases are upgraded automatically when the server starts (a `professors` table and an `exams.professor_id` column are added).
+
 ## 2. Backend
 
 Open a terminal in `backend/`:
@@ -36,22 +44,14 @@ In Chrome/Edge/Brave/Opera, open the extensions page, enable Developer Mode, cho
 
 The extension is configured for local testing at `http://localhost:3000/*`.
 
-## 4. Desktop monitor
+## 4. Desktop monitor (optional, not required)
 
-Install Python 3, then open a terminal in `monitor/`:
-
-```bash
-pip install -r requirements.txt
-python monitor.py
-```
-
-Enter the same Student ID that will be used in the exam portal.
-
-Windows is the easiest platform. Linux requires Xorg + `xdotool`; macOS requires Screen Recording permission.
+Students only need the browser extension. `monitor/monitor.py` is an optional extra that names other apps (Word, PDF readers); without it, those show as "Switched tab" / "Left exam window".
 
 ## 5. Test pages
 
 - Home: `http://localhost:3000/`
+- Log in / create account: `http://localhost:3000/login.html`
 - Admin: `http://localhost:3000/admin.html`
 - Dashboard: `http://localhost:3000/dashboard.html`
 - Live Activity: `http://localhost:3000/activity.html`

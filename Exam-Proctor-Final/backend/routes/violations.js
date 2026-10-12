@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const { ownsSession } = require('../auth');
 
 // POST /api/violations
 // body: { sessionId, studentId, type, occurredAt, details }
@@ -33,6 +34,9 @@ router.post('/', async (req, res) => {
 // All violations for one specific exam attempt, in order.
 router.get('/session/:sessionId', async (req, res) => {
   try {
+    if (!(await ownsSession(req.professor.id, req.params.sessionId))) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
     const [rows] = await pool.query(
       'SELECT * FROM violations WHERE session_id = ? ORDER BY occurred_at',
       [req.params.sessionId]

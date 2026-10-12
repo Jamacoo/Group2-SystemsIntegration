@@ -11,11 +11,21 @@ const TABLES = `
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 
+  CREATE TABLE IF NOT EXISTS professors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(190) NOT NULL UNIQUE,
+    password_hash VARCHAR(300) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
   CREATE TABLE IF NOT EXISTS exams (
     id INT AUTO_INCREMENT PRIMARY KEY,
     exam_name VARCHAR(150) NOT NULL,
     form_url VARCHAR(500) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    professor_id INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_exam_professor (professor_id)
   );
 
   CREATE TABLE IF NOT EXISTS exam_sessions (
@@ -87,7 +97,16 @@ async function setupDatabase() {
 
     await conn.query(TABLES);
 
+    // Databases made before professor accounts existed: add the owner column.
+    const [cols] = await conn.query(
+      "SELECT COUNT(*) AS n FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'exams' AND column_name = 'professor_id'"
+    );
+    if (cols[0].n === 0) {
+      await conn.query('ALTER TABLE exams ADD COLUMN professor_id INT NULL, ADD INDEX idx_exam_professor (professor_id)');
+    }
+
     // Add one sample exam on a brand-new database so there is something to test.
+    // It has no owner yet: the first professor to sign up receives it.
     if (firstRun) {
       await conn.query('INSERT INTO exams (exam_name, form_url) VALUES (?, ?)', [
         'Sample Exam',

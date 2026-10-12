@@ -5,12 +5,15 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const { ownsExam } = require('../auth');
+const { normalizeFormUrl, toEmbedUrl, FormUrlError } = require('../formurl');
 
-// GET /api/exams — list every exam (used by the admin panel)
+// GET /api/exams — the logged-in professor's exams (used by the admin panel and dashboard)
 router.get('/', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT id, exam_name, form_url, created_at FROM exams ORDER BY created_at DESC, id DESC'
+      'SELECT id, exam_name, form_url, created_at FROM exams WHERE professor_id = ? ORDER BY created_at DESC, id DESC',
+      [req.professor.id]
     );
     res.json(rows);
   } catch (err) {
@@ -28,7 +31,9 @@ router.get('/:id', async (req, res) => {
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Exam not found' });
     }
-    res.json(rows[0]);
+    const exam = rows[0];
+    exam.form_url = toEmbedUrl(exam.form_url) || exam.form_url;   // older saved links still work
+    res.json(exam);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -37,17 +42,20 @@ router.get('/:id', async (req, res) => {
 // POST /api/exams — create a new exam
 // body: { examName, formUrl }
 router.post('/', async (req, res) => {
-  const { examName, formUrl } = req.body;
+  const { examName } = req.body;
+  let { formUrl } = req.body;
   if (!examName || !formUrl) {
     return res.status(400).json({ error: 'examName and formUrl are required' });
   }
   try {
+    formUrl = await normalizeFormUrl(formUrl);
     const [result] = await pool.query(
-      'INSERT INTO exams (exam_name, form_url) VALUES (?, ?)',
-      [examName, formUrl]
+      'INSERT INTO exams (exam_name, form_url, professor_id) VALUES (?, ?, ?)',
+      [examName, formUrl, req.professor.id]
     );
     res.status(201).json({ id: result.insertId, exam_name: examName, form_url: formUrl });
   } catch (err) {
+    if (err instanceof FormUrlError) return res.status(400).json({ error: err.message });
     res.status(500).json({ error: err.message });
   }
 });
@@ -55,17 +63,23 @@ router.post('/', async (req, res) => {
 // PUT /api/exams/:id — update an existing exam's name/URL
 // body: { examName, formUrl }
 router.put('/:id', async (req, res) => {
-  const { examName, formUrl } = req.body;
+  const { examName } = req.body;
+  let { formUrl } = req.body;
   if (!examName || !formUrl) {
     return res.status(400).json({ error: 'examName and formUrl are required' });
   }
   try {
+    formUrl = await normalizeFormUrl(formUrl);
+    if (!(await ownsExam(req.professor.id, req.params.id))) {
+      return res.status(404).json({ error: 'Exam not found' });
+    }
     await pool.query(
-      'UPDATE exams SET exam_name = ?, form_url = ? WHERE id = ?',
-      [examName, formUrl, req.params.id]
+      'UPDATE exams SET exam_name = ?, form_url = ? WHERE id = ? AND professor_id = ?',
+      [examName, formUrl, req.params.id, req.professor.id]
     );
     res.json({ status: 'updated' });
   } catch (err) {
+    if (err instanceof FormUrlError) return res.status(400).json({ error: err.message });
     res.status(500).json({ error: err.message });
   }
 });
@@ -75,6 +89,13 @@ router.put('/:id', async (req, res) => {
 // violations, activity log), since the database won't allow an exam
 // to be removed while those rows still point to it.
 router.delete('/:id', async (req, res) => {
+  try {
+    if (!(await ownsExam(req.professor.id, req.params.id))) {
+      return res.status(404).json({ error: 'Exam not found' });
+    }
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();

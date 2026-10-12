@@ -1,6 +1,6 @@
 // reset-data.js — wipes all exams, sessions, violations and activity records,
 // then creates one fresh "Sample Exam". Run:  npm run reset   (in backend/)
-// Student records are kept.
+// Professor accounts are kept.
 
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const mysql = require('mysql2/promise');
@@ -18,7 +18,8 @@ const { getDbConfig } = require('./dbconfig');
       await conn.query(`TRUNCATE TABLE ${t}`);      // also resets ids back to 1
     }
     await conn.query('SET FOREIGN_KEY_CHECKS = 1');
-    await conn.query('INSERT INTO exams (exam_name, form_url) VALUES (?, ?)', [
+    // The new sample exam goes to the first professor account (or to whoever signs up first).
+    await conn.query('INSERT INTO exams (exam_name, form_url, professor_id) VALUES (?, ?, (SELECT MIN(id) FROM professors))', [
       'Sample Exam',
       'https://docs.google.com/forms/d/e/1FAIpQLSdOksUPuuxkmuBqNmPFnnjzLFpHiXzckApZ13KPiTfTwjINIw/viewform?embedded=true'
     ]);

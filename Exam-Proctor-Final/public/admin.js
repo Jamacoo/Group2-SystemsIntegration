@@ -80,7 +80,7 @@ function showStatus(message, isError) {
   const el = document.getElementById('status-msg');
   el.textContent = message;
   el.className = isError ? 'error' : 'success';
-  setTimeout(() => { el.textContent = ''; el.className = ''; }, 3000);
+  setTimeout(() => { el.textContent = ''; el.className = ''; }, isError ? 7000 : 3000);
 }
 
 async function fetchExams() {
@@ -154,11 +154,12 @@ function enterEditMode(tr, exam) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ examName, formUrl })
       });
-      if (!res.ok) throw new Error('Update failed');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Update failed');
       showStatus('Exam updated.', false);
       loadExams();
     } catch (err) {
-      showStatus('Failed to update exam.', true);
+      showStatus(err.message === 'Update failed' ? 'Failed to update exam.' : err.message, true);
     }
   });
 
@@ -198,7 +199,11 @@ async function addExam() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ examName, formUrl })
     });
-    if (!res.ok) throw new Error('Create failed');
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      showStatus(data.error || 'Failed to add exam.', true);
+      return;
+    }
     nameInput.value = '';
     urlInput.value = '';
     showStatus('Exam added.', false);

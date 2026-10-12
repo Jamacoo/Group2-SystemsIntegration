@@ -42,7 +42,7 @@ const SUBMISSION_DIALOG_WINDOW_SECONDS = 10;
 const SUBMISSION_DIALOG_TYPES = ['EXITED_FULLSCREEN', 'FOCUS_LOST_POLL'];
 
 // GET /api/dashboard/sessions
-// Returns every session with its violation count and a computed risk score.
+// Returns the logged-in professor's sessions with violation count and risk score.
 router.get('/sessions', async (req, res) => {
   try {
     const typeList = SUBMISSION_DIALOG_TYPES.map(t => `'${t}'`).join(', ');
@@ -63,7 +63,7 @@ router.get('/sessions', async (req, res) => {
           THEN 1 ELSE 0 END), 0) AS likely_submission_dialog
       FROM exam_sessions s
       LEFT JOIN violations v ON v.session_id = s.id
-      LEFT JOIN exams e ON e.id = s.exam_id
+      JOIN exams e ON e.id = s.exam_id AND e.professor_id = ?
       LEFT JOIN (
         SELECT session_id, MAX(occurred_at) AS max_occurred_at
         FROM violations
@@ -71,7 +71,7 @@ router.get('/sessions', async (req, res) => {
       ) vmax ON vmax.session_id = s.id
       GROUP BY s.id, s.student_id, s.exam_id, e.exam_name, s.started_at, s.ended_at
       ORDER BY risk_score DESC, s.started_at DESC
-    `);
+    `, [req.professor.id]);
     res.json(rows);
   } catch (err) {
     console.error('Error building dashboard summary:', err.message);

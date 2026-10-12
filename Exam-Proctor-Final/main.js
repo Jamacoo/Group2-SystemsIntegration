@@ -1,5 +1,4 @@
 const { app, BrowserWindow, Menu, dialog, shell, clipboard } = require('electron');
-const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const { isValidDatabaseUrl, setEnvLine } = require('./backend/dbconfig');
@@ -23,15 +22,7 @@ function loadEnv() {
   }
   require('dotenv').config({ path: envFile });
 
-  // Make sure there is an instructor password. Created once, then reused.
-  let newPassword = false;
-  if (!process.env.ADMIN_PASSWORD) {
-    const password = crypto.randomBytes(9).toString('base64url');
-    fs.appendFileSync(envFile, '\nADMIN_PASSWORD=' + password + '\n');
-    process.env.ADMIN_PASSWORD = password;
-    newPassword = true;
-  }
-  return { newPassword };
+  return {};
 }
 
 // Saves the database address in the settings file.
@@ -39,23 +30,6 @@ function saveDatabaseUrl(url) {
   const text = fs.readFileSync(envFile, 'utf8');
   fs.writeFileSync(envFile, setEnvLine(text, 'DB_URL', url));
   process.env.DB_URL = url;
-}
-
-// Shows the instructor password, with a button to copy it.
-async function showPassword() {
-  const result = await dialog.showMessageBox({
-    type: 'info',
-    title: 'Instructor password',
-    message: 'Your instructor password',
-    detail:
-      'The Admin Panel, Dashboard, and Live Activity pages ask for this password. ' +
-      'Type any username.\n\n' +
-      'Password: ' + process.env.ADMIN_PASSWORD + '\n\n' +
-      'You can see it again under Help > Show Instructor Password.',
-    buttons: ['Copy password', 'OK'],
-    defaultId: 1
-  });
-  if (result.response === 0) clipboard.writeText(process.env.ADMIN_PASSWORD);
 }
 
 // Explains how to let students on other networks join.
@@ -83,16 +57,16 @@ const SETUP_URL = 'http://db-setup.invalid/';
 const SETUP_HTML = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"><title>Connect your database</title>
 <style>
-  body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; color: #1a1a1a; }
-  header { background: #7A0C22; color: #FFC72C; padding: 14px 24px; font-weight: bold; }
+  body { font-family: Arial, sans-serif; margin: 0; background: #0F1515; color: #FFFFFF; }
+  header { background: #08282A; color: #5CCFD3; padding: 14px 24px; font-weight: bold; border-bottom: 1px solid #1C5052; }
   main { padding: 20px 24px; }
-  h2 { margin: 0 0 8px; color: #5C0918; }
+  h2 { margin: 0 0 8px; color: #FFFFFF; }
   ol { padding-left: 20px; line-height: 1.6; }
-  input[type=text] { width: 100%; box-sizing: border-box; padding: 9px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
+  input[type=text] { width: 100%; box-sizing: border-box; padding: 9px; font-size: 13px; border: 1px solid #177D81; border-radius: 8px; background: #08282A; color: #FFFFFF; }
   .row { margin-top: 14px; display: flex; gap: 10px; align-items: center; }
-  button { background: #7A0C22; color: #fff; border: none; border-radius: 4px; padding: 9px 18px; font-size: 14px; cursor: pointer; }
-  a { color: #7A0C22; font-size: 14px; }
-  .note { font-size: 12px; color: #666; margin-top: 12px; }
+  button { background: #177D81; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 14px; cursor: pointer; }
+  a { color: #5CCFD3; font-size: 14px; }
+  .note { font-size: 12px; color: #BDDED6; margin-top: 12px; }
 </style></head><body>
 <header>TestGuard</header>
 <main>
@@ -270,7 +244,6 @@ function createMenu() {
       submenu: [
         { label: 'Install Browser Extension...', click: showExtensionHelp },
         { label: 'Share Over the Internet...', click: showTunnelHelp },
-        { label: 'Show Instructor Password', click: showPassword },
         { label: 'Database Settings...', click: changeDatabaseSettings }
       ]
     }
@@ -278,14 +251,8 @@ function createMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
-// The app's own window logs in to the instructor pages automatically.
-app.on('login', (event, webContents, request, authInfo, callback) => {
-  event.preventDefault();
-  callback('admin', process.env.ADMIN_PASSWORD);
-});
-
 app.whenReady().then(async () => {
-  const { newPassword } = loadEnv();
+  loadEnv();
 
   if (!(await connectDatabase())) {
     app.quit();
@@ -300,7 +267,6 @@ app.whenReady().then(async () => {
   win.on('page-title-updated', (event) => event.preventDefault());
   win.loadURL('http://localhost:3000/');
 
-  if (newPassword) await showPassword();
   showExtensionHelpOnFirstRun();
 });
 
