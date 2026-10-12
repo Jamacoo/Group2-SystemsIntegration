@@ -13,12 +13,24 @@ CREATE TABLE IF NOT EXISTS students (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- One row per professor who can log in to the admin pages.
+CREATE TABLE IF NOT EXISTS professors (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  email VARCHAR(190) NOT NULL UNIQUE,
+  password_hash VARCHAR(300) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- One row per exam that can be assigned (maps a Google Form URL to a name).
+-- professor_id = the professor who owns it (only they can see its records).
 CREATE TABLE IF NOT EXISTS exams (
   id INT AUTO_INCREMENT PRIMARY KEY,
   exam_name VARCHAR(150) NOT NULL,
   form_url VARCHAR(500) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  professor_id INT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_exam_professor (professor_id)
 );
 
 -- One row per session — created when a student clicks "Start Exam".

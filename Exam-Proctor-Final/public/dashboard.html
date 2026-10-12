@@ -1,106 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Instructor Dashboard</title>
-<style>
-  :root {
-    --maroon: #7A0C22;
-    --maroon-dark: #5C0918;
-    --gold: #FFC72C;
-    --gold-dark: #D4A017;
-    --gold-light: #FFF6DF;
-  }
-  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f8f9fa; }
-  nav {
-    background: var(--maroon); padding: 14px 30px; display: flex; align-items: center;
-    gap: 24px;
-  }
-  nav .brand { color: var(--gold); font-weight: bold; font-size: 16px; margin-right: auto; }
-  nav a { color: #f0d9b5; text-decoration: none; font-size: 14px; }
-  nav a:hover, nav a.active { color: var(--gold); }
-  main { padding: 30px; }
-  h2 { margin-top: 0; color: var(--maroon-dark); }
-  #toolbar { margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
-  #refresh-btn {
-    padding: 8px 16px; background: var(--maroon); color: #fff; border: none;
-    border-radius: 4px; cursor: pointer; font-size: 14px;
-  }
-  #refresh-btn:hover { background: var(--maroon-dark); }
-  #last-updated { color: #666; font-size: 13px; }
-  table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-  th, td { padding: 10px 14px; text-align: left; border: 1px solid #ccc; font-size: 14px; }
-  th { background: var(--gold-light); color: var(--maroon-dark); font-weight: 700; border-bottom: 2px solid var(--maroon); }
-  tr.session-row { cursor: pointer; }
-  tr.session-row:hover { background: #fdf3f4; }
-  .risk-badge {
-    display: inline-block; padding: 3px 10px; border-radius: 12px;
-    font-size: 12px; font-weight: bold; color: #fff;
-  }
-  .risk-clean { background: #6b7280; }
-  .risk-low { background: #16a34a; }
-  .risk-medium { background: #f59e0b; }
-  .risk-high { background: #dc2626; }
-  .caveat-note { margin-top: 4px; font-size: 12px; color: #b45309; max-width: 320px; }
-  .dialog-flag { color: #b45309; font-style: italic; font-size: 12px; }
-  .detail-row td { background: #fafafa; padding: 0; }
-  .detail-content { padding: 12px 24px; }
-  .detail-content ul { margin: 6px 0; padding-left: 20px; }
-  .detail-content li { font-size: 13px; margin-bottom: 4px; }
-  .detail-table { width: 100%; margin: 6px 0; box-shadow: none; }
-  .detail-table th, .detail-table td { font-size: 13px; padding: 6px 10px; border: 1px solid #e5e7eb; }
-  .detail-table tr.sev-high td { background: #fef2f2; }
-  .detail-table tr.sev-medium td { background: #fffbeb; }
-  .muted { color: #6b7280; font-size: 12px; }
-  .src-badge {
-    display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px;
-    background: #e5e7eb; color: #374151;
-  }
-  .src-extension { background: #dbeafe; color: #1e40af; }
-  .src-monitor { background: #ede9fe; color: #5b21b6; }
-  .status-dot { font-size: 12px; white-space: nowrap; }
-  .status-on { color: #16a34a; }
-  .status-off { color: #dc2626; }
-  #empty-msg { text-align: center; padding: 40px; color: #888; }
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — TestGuard</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-
-<nav>
-  <span class="brand">TestGuard</span>
-  <a href="index.html">Home</a>
-  <a href="admin.html">Admin Panel</a>
-  <a href="dashboard.html" class="active">Dashboard</a>
-  <a href="activity.html">Live Activity</a>
-  <a href="guide.html">Setup Guide</a>
-</nav>
-
-
+<div id="nav-root" data-active="dashboard"></div>
+<script src="common.js"></script>
 <main>
-  <h2>Dashboard</h2>
-  <div id="toolbar">
-    <button id="refresh-btn">Refresh</button>
-    <label style="font-size:13px;color:#444;"><input type="checkbox" id="auto-refresh" checked> Auto-refresh (10s)</label>
+  <div class="page-head">
+    <div>
+      <h2>Dashboard</h2>
+      <p>Every student session for your exams. Click a row to see what was flagged.</p>
+    </div>
     <span id="last-updated"></span>
   </div>
 
-  <table id="sessions-table">
-    <thead>
-      <tr>
-        <th>Student ID</th>
-        <th>Exam</th>
-        <th>Started</th>
-        <th>Ended</th>
-        <th>Violations</th>
-        <th>Risk</th>
-        <th>Proctoring</th>
-      </tr>
-    </thead>
-    <tbody id="sessions-body"></tbody>
-  </table>
+  <div class="stats">
+    <div class="stat"><div class="n" id="stat-total">0</div><div class="l">Sessions</div></div>
+    <div class="stat live"><div class="n" id="stat-live">0</div><div class="l">Live now</div></div>
+    <div class="stat hot"><div class="n" id="stat-high">0</div><div class="l">High risk</div></div>
+    <div class="stat"><div class="n" id="stat-violations">0</div><div class="l">Violations</div></div>
+  </div>
 
-  <div id="empty-msg" style="display:none;">No exam sessions recorded yet.</div>
+  <div class="filters">
+    <div class="f">
+      <label for="filter-exam">Exam</label>
+      <select id="filter-exam"><option value="">All exams</option></select>
+    </div>
+    <div class="f">
+      <label for="filter-status">Status</label>
+      <select id="filter-status">
+        <option value="">All sessions</option>
+        <option value="live">Live now</option>
+        <option value="ended">Ended</option>
+      </select>
+    </div>
+    <div class="f">
+      <label for="filter-risk">Risk</label>
+      <select id="filter-risk">
+        <option value="">Any risk</option>
+        <option value="flagged">Flagged (Low and up)</option>
+        <option value="high">High only</option>
+        <option value="clean">Clean only</option>
+      </select>
+    </div>
+    <div class="f wide">
+      <label for="filter-search">Student ID</label>
+      <input type="text" id="filter-search" placeholder="Search a student…">
+    </div>
+    <div class="f end">
+      <button class="ghost" id="clear-filters">Clear</button>
+      <button id="refresh-btn">Refresh</button>
+      <label><input type="checkbox" id="auto-refresh" checked>Auto-refresh (10s)</label>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="sessions-table">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Exam</th>
+          <th>Started</th>
+          <th>Ended</th>
+          <th>Violations</th>
+          <th>Risk</th>
+          <th>Proctoring</th>
+        </tr>
+      </thead>
+      <tbody id="sessions-body"></tbody>
+    </table>
+    <div id="empty-msg" style="display:none;">No exam sessions recorded yet.</div>
+  </div>
 </main>
 
 <script src="dashboard.js"></script>

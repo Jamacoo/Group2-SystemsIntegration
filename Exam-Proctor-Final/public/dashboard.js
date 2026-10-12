@@ -154,12 +154,15 @@ async function toggleRow(sessionId, rowEl) {
   td.innerHTML = renderDetailContent(violations);
 }
 
-function renderTable(sessions) {
+function renderTable(sessions, hasAny) {
   const tbody = document.getElementById('sessions-body');
   const emptyMsg = document.getElementById('empty-msg');
   tbody.innerHTML = '';
 
   if (sessions.length === 0) {
+    emptyMsg.textContent = hasAny
+      ? 'No sessions match these filters.'
+      : 'No exam sessions recorded yet.';
     emptyMsg.style.display = 'block';
     return;
   }
@@ -176,7 +179,7 @@ function renderTable(sessions) {
       <td>${esc(session.student_id)}</td>
       <td>${esc(session.exam_name || 'Exam #' + session.exam_id)}</td>
       <td>${formatDateTime(session.started_at)}</td>
-      <td>${formatDateTime(session.ended_at)}</td>
+      <td>${session.ended_at ? formatDateTime(session.ended_at) : '<span class="pill-live">Live</span>'}</td>
       <td>${session.violation_count}</td>
       <td>
         <span class="risk-badge ${risk.className}">${risk.text} (${session.risk_score})</span>
@@ -194,8 +197,58 @@ function renderTable(sessions) {
   });
 }
 
-// For sessions still running, show whether the browser extension and the
-// desktop monitor are currently reporting in.
+// ---------- Filters ----------
+let allSessions = [];
+const $ = id => document.getElementById(id);
+
+function saveFilter(key, value) {
+  try { localStorage.setItem('dash-' + key, value); } catch (e) {}
+}
+function loadFilter(key) {
+  try { return localStorage.getItem('dash-' + key) || ''; } catch (e) { return ''; }
+}
+
+function matchesFilters(s) {
+  const exam = $('filter-exam').value;
+  const status = $('filter-status').value;
+  const risk = $('filter-risk').value;
+  const q = $('filter-search').value.trim().toLowerCase();
+  if (exam && String(s.exam_id) !== exam) return false;
+  if (status === 'live' && s.ended_at) return false;
+  if (status === 'ended' && !s.ended_at) return false;
+  if (risk === 'clean' && s.risk_score !== 0) return false;
+  if (risk === 'flagged' && s.risk_score === 0) return false;
+  if (risk === 'high' && s.risk_score <= 14) return false;
+  if (q && !String(s.student_id).toLowerCase().includes(q)) return false;
+  return true;
+}
+
+function applyFilters() {
+  const shown = allSessions.filter(matchesFilters);
+  $('stat-total').textContent = shown.length;
+  $('stat-live').textContent = shown.filter(s => !s.ended_at).length;
+  $('stat-high').textContent = shown.filter(s => s.risk_score > 14).length;
+  $('stat-violations').textContent = shown.reduce((n, s) => n + Number(s.violation_count || 0), 0);
+  renderTable(shown, allSessions.length > 0);
+  loadStatuses(shown);
+}
+
+// The Exam dropdown lists every exam this professor owns, even ones nobody has taken yet.
+async function loadExamOptions() {
+  const sel = $('filter-exam');
+  const keep = sel.value || loadFilter('exam');
+  let exams = [];
+  try {
+    const res = await fetch(`${API_BASE}/exams`);
+    if (res.ok) exams = await res.json();
+  } catch (e) {}
+  sel.innerHTML = '<option value="">All exams</option>' +
+    exams.map(e => `<option value="${e.id}">${esc(e.exam_name)}</option>`).join('');
+  sel.value = exams.some(e => String(e.id) === String(keep)) ? keep : '';
+}
+
+// For sessions still running, show whether the browser extension is
+// currently reporting in.
 async function loadStatuses(sessions) {
   const active = sessions.filter(s => !s.ended_at);
   await Promise.all(active.map(async s => {
@@ -206,9 +259,7 @@ async function loadStatuses(sessions) {
       const st = await res.json();
       const dot = (on, name) =>
         `<span class="status-dot ${on ? 'status-on' : 'status-off'}">${on ? '●' : '○'} ${name}</span>`;
-      cell.innerHTML = dot(st.extensionAlive, 'Extension') + '<br>' + dot(st.monitorAlive, 'Monitor') +
-        (st.monitorInfo && st.monitorInfo.limited
-          ? '<div class="muted">Monitor limited on this OS</div>' : '');
+      cell.innerHTML = dot(st.extensionAlive, 'Extension');
     } catch {
       cell.innerHTML = '<span class="muted">unknown</span>';
     }
@@ -217,28 +268,49 @@ async function loadStatuses(sessions) {
 
 async function loadDashboard() {
   try {
-    const sessions = await fetchSessions();
-    renderTable(sessions);
-    loadStatuses(sessions);
-    document.getElementById('last-updated').textContent =
-      'Last updated: ' + new Date().toLocaleTimeString();
+    allSessions = (await fetchSessions()).map(s => ({
+      ...s, risk_score: Number(s.risk_score), violation_count: Number(s.violation_count)
+    }));
+    applyFilters();
+    $('last-updated').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
   } catch (err) {
     console.error('Failed to load dashboard:', err);
-    document.getElementById('last-updated').textContent =
-      'Failed to load — is the backend running?';
+    $('last-updated').textContent = 'Failed to load — is the backend running?';
   }
 }
 
-document.getElementById('refresh-btn').addEventListener('click', () => {
-  violationCache.clear();
-  loadDashboard();
+// Restore the last filters used.
+$('filter-status').value = loadFilter('status');
+$('filter-risk').value = loadFilter('risk');
+$('filter-search').value = loadFilter('search');
+
+['exam', 'status', 'risk'].forEach(key => {
+  $('filter-' + key).addEventListener('change', () => {
+    saveFilter(key, $('filter-' + key).value);
+    applyFilters();
+  });
+});
+$('filter-search').addEventListener('input', () => {
+  saveFilter('search', $('filter-search').value);
+  applyFilters();
+});
+$('clear-filters').addEventListener('click', () => {
+  ['exam', 'status', 'risk'].forEach(key => { $('filter-' + key).value = ''; saveFilter(key, ''); });
+  $('filter-search').value = '';
+  saveFilter('search', '');
+  applyFilters();
 });
 
-loadDashboard();
+$('refresh-btn').addEventListener('click', () => {
+  violationCache.clear();
+  loadExamOptions().then(loadDashboard);
+});
+
+loadExamOptions().then(loadDashboard);
 
 // Live view: re-fetch every 10s (clearing the cache so open rows pick up new events).
 setInterval(() => {
-  if (document.getElementById('auto-refresh').checked) {
+  if ($('auto-refresh').checked) {
     violationCache.clear();
     loadDashboard();
   }
