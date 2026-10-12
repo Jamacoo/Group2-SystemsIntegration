@@ -1,4 +1,4 @@
-# Exam Proctor — Combined Add-ons Build
+# TestGuard — Combined Add-ons Build
 
 This folder combines the original Exam Proctor application with the browser-extension and desktop-monitor add-ons.
 
